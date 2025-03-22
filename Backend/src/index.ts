@@ -11,7 +11,8 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-  origin: `${process.env.CORS_ORIGIN}`,
+  origin: [  "http://localhost:3000",  // Local development
+  "https://round-robin-coupon-distribution-one.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
   credentials: true
 }));
