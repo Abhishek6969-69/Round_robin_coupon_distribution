@@ -10,7 +10,16 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-app.use(cors());  
+
+
+app.use(
+  cors({
+    origin: "https://round-robin-coupon-distribution-one.vercel.app", // ✅ Use frontend URL
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    credentials: true, // ✅ Allow cookies & auth tokens
+  })
+);
+
 
 app.use(express.json());
 app.use(cookieParser());
