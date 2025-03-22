@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import AddCouponForm from "./Addcoupnform"; // Fixed typo
 import CouponTable from "./CouponTable";
 
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Coupon {
   id: number;
