@@ -51,6 +51,27 @@ router.post("/login", async (req: any, res: any) => {
   }
 });
 
+router.post("/coupons", authenticateToken, async (req: any, res: any) => {
+   const { code, isActive } = req.body; // Fixed: Destructure directly
+   console.log("Received POST request for new coupon:", { code, isActive }); // Debugging log
+   try {
+     if (!code || typeof isActive !== "boolean") {
+       return res.status(400).json({ error: "Code and isActive are required" });
+     }
+     const coupon = await prisma.coupon.create({
+       data: {
+         code,
+         isActive,
+         createdAt: new Date(),
+         updatedAt: new Date(),
+       },
+     });
+     res.status(201).json(coupon);
+   } catch (error) {
+     console.error("Error creating coupon:", error);
+     res.status(500).json({ error: "Server error" });
+   }
+ });
 // Get All Coupons (Protected)
 router.get("/coupons", authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -62,13 +83,14 @@ router.get("/coupons", authenticateToken, async (req: Request, res: Response) =>
 });
 
 // Toggle Coupon Status (Protected)
-router.patch("/coupons/:id", authenticateToken, async (req:any, res:any) => {
+router.patch("/coupons/:id", authenticateToken, async (req: any, res: any) => {
    const { id } = req.params;
-   console.log("Received PATCH request for ID:", id); // Debugging log
+   const { code, isActive } = req.body;
+   console.log("Received PATCH request for ID:", id, "with data:", { code, isActive });
  
    try {
      const coupon = await prisma.coupon.findUnique({
-       where: { id  },
+       where: { id },
      });
  
      if (!coupon) {
@@ -78,16 +100,30 @@ router.patch("/coupons/:id", authenticateToken, async (req:any, res:any) => {
  
      const updatedCoupon = await prisma.coupon.update({
        where: { id },
-       data: { isActive: !coupon.isActive, updatedAt: new Date() },
+       data: {
+         code: code !== undefined ? code : coupon.code, // Only update if provided
+         isActive: isActive !== undefined ? isActive : coupon.isActive, // Only update if provided
+         updatedAt: new Date(),
+       },
      });
- 
      res.json(updatedCoupon);
    } catch (error) {
      console.error("Error updating coupon:", error);
      res.status(500).json({ error: "Server error" });
    }
  });
- 
+ router.get("/claimhistory", authenticateToken, async (req: Request, res: Response) => {
+   try {
+     const claims = await prisma.claim.findMany({
+       include: { coupon: { select: { code: true  } } }, // Include coupon code
+       orderBy: { timestamp: "desc" },
+     });
+     res.json(claims);
+   } catch (error) {
+     console.error("Error fetching claims:", error);
+     res.status(500).json({ error: "Server error" });
+   }
+ });
  
  
 export default router;

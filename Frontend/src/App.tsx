@@ -7,6 +7,7 @@ import CouponList from "./components/CouponList"; // Fixed naming
 import CouponClaim from "./components/couponclaim"; // Added user claim
 import ProtectedRoute from "./components/Protectedroute"; // Fixed casing
 import NotFound from "./components/error";
+import ClaimHistory from "./components/claimhistory";
 const App: React.FC = () => {
   return (
     <Router>
@@ -18,6 +19,7 @@ const App: React.FC = () => {
         {/* Protected Routes for Admin */}
         <Route element={<ProtectedRoute />}>
           <Route path="/coupons" element={<CouponList />} />
+          <Route path="*" element={<ClaimHistory/>} />
         </Route>
 
         {/* Catch-all for unknown routes */}

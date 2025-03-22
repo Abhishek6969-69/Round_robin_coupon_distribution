@@ -1,11 +1,14 @@
-// admin-frontend/src/components/CouponList.tsx
+// admin-frontend/src/components/CouponList/CouponList.tsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AddCouponForm from "./Addcoupnform"; // Fixed typo
+import CouponTable from "./CouponTable";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "http://localhost:3000";
+
 interface Coupon {
-  id: string;
+  id: number;
   code: string;
   isActive: boolean;
   createdAt: string;
@@ -14,82 +17,87 @@ interface Coupon {
 
 const CouponList: React.FC = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [error, setError] = useState<string>("");
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!token) {
-      navigate("/");
+      navigate("/login");
       return;
     }
-    axios
-      .get(`${API_URL}/api/admin/coupons`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((response) => setCoupons(response.data))
-      .catch((error) => {
-        console.error("Error fetching coupons:", error);
-        navigate("/");
-      });
+    fetchCoupons();
   }, [token, navigate]);
 
-  const toggleCoupon = async (id: string, isActive: boolean) => {
-    console.log("Toggling Coupon ID:", id);  // Debugging
+  const fetchCoupons = async () => {
     try {
-      const response = await axios.patch(
-        `${API_URL}/api/admin/coupons/${id}`,
-        { isActive: !isActive },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setCoupons(coupons.map((coupon) => (coupon.id === id ? response.data : coupon)));
+      const response = await axios.get(`${API_URL}/api/admin/coupons`, { // Fixed endpoint
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCoupons(response.data);
     } catch (error) {
-      console.error("Error toggling coupon:", error);
+      console.error("Error fetching coupons:", error);
+      handleAuthError(error);
     }
+  };
+
+  const handleAuthError = (error: any) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      setError("Session expired. Please log in again.");
+      setTimeout(() => navigate("/login"), 2000);
+    } else {
+      setError("Failed to perform action. Try again later.");
+    }
+  };
+
+  const handleAddCoupon = (coupon: Coupon) => {
+    setCoupons([...coupons, coupon]);
+  };
+
+  const handleUpdateCoupon = (updatedCoupon: Coupon) => {
+    setCoupons(coupons.map((coupon) => (coupon.id === updatedCoupon.id ? updatedCoupon : coupon)));
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/");
+    navigate("/login");
+  };
+
+  const handleViewClaimHistory = () => {
+    navigate("/claimhistory");
   };
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl">Admin Panel - Coupons</h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
-        >
-          Logout
-        </button>
+        <h1 className="text-3xl font-bold text-gray-800">Admin Panel - Coupons</h1>
+        <div className="flex space-x-4">
+          <button
+            onClick={handleViewClaimHistory}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-200"
+          >
+            View Claim History
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200"
+          >
+            Logout
+          </button>
+        </div>
       </div>
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="p-2 border">ID</th>
-            <th className="p-2 border">Code</th>
-            <th className="p-2 border">Active</th>
-            <th className="p-2 border">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {coupons.map((coupon) => (
-            <tr key={coupon.id} className="hover:bg-gray-100">
-              <td className="p-2 border">{coupon.id}</td>
-              <td className="p-2 border">{coupon.code}</td>
-              <td className="p-2 border">{coupon.isActive ? "Yes" : "No"}</td>
-              <td className="p-2 border">
-                <button
-                  onClick={() => toggleCoupon((coupon.id), coupon.isActive)}
-                  className={`p-1 rounded text-white ${
-                    coupon.isActive ? "bg-red-500" : "bg-green-500"
-                  }`}
-                >
-                  {coupon.isActive ? "Disable" : "Enable"}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {error && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+          {error}
+        </div>
+      )}
+      <AddCouponForm onAdd={handleAddCoupon} token={token} setError={setError} />
+      <CouponTable
+        coupons={coupons}
+        onUpdate={handleUpdateCoupon}
+        token={token}
+        setError={setError}
+      />
     </div>
   );
 };
