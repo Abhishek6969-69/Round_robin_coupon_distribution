@@ -6,17 +6,26 @@ const couponRouter = express.Router();
 const prisma = new PrismaClient();
 
 couponRouter.post("/claim", async (req: any, res: any) => {
-  const ipAddress = (req.headers["x-forwarded-for"] as string) || req.ip;
+  // Handle X-Forwarded-For header properly
+  const forwardedFor = req.headers["x-forwarded-for"];
+  const ipAddress = forwardedFor
+    ? (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor.split(",")[0]).trim()
+    : req.ip;
   const cookieId = req.cookies.coupon_session || Math.random().toString(36).substring(2);
 
+  console.log("Detected IP:", ipAddress); // Debug log
+
   try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    console.log("Checking claims since:", twentyFourHoursAgo); // Debug log
     const recentClaim = await prisma.claim.findFirst({
       where: {
         ipaddress: ipAddress,
-        timestamp: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+        timestamp: { gte: twentyFourHoursAgo },
       },
     });
     if (recentClaim) {
+      console.log("Found recent claim:", recentClaim); // Debug log
       return res.status(429).json({ message: "You have already claimed a coupon in the last 24 hours" });
     }
 

@@ -9,12 +9,13 @@ dotenv.config();
 
 const app = express();
 const PORT = 3000;
-
+app.set("trust proxy", true);
 
 
 app.use(
   cors({
     origin: "https://round-robin-coupon-distribution-one.vercel.app", // ✅ Use frontend URL
+    // origin:[ "http://localhost:3000" , "http://localhost:5173"],
     methods: ["GET", "POST", "PATCH", "DELETE"],
     credentials: true, // ✅ Allow cookies & auth tokens
   })
