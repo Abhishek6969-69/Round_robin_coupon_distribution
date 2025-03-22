@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
-    "dev": "nodemon --exec tsx src/index.ts"
+    "dev": "nodemon --exec tsx src/index.ts",
+    "build": "tsc",
+    "prisma:generate": "npx prisma generate --schema=src/prisma/schema.prisma",
+    "prisma:migrate": "npx prisma migrate deploy --schema=src/prisma/schema.prisma",
+    "prisma:push": "npx prisma db push --schema=src/prisma/schema.prisma"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

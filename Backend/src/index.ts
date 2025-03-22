@@ -11,7 +11,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:5173"], 
+  origin: "http://localhost:3000", // Allow frontend to connect
   methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
   credentials: true
 }));
