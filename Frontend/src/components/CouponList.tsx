@@ -60,7 +60,7 @@ const CouponList: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/admin/login");
   };
 
   const handleViewClaimHistory = () => {
