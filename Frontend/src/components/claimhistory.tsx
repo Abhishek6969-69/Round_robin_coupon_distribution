@@ -103,7 +103,7 @@ const ClaimHistory: React.FC = () => {
               <tr className="bg-gray-200 text-gray-700">
                 <th className="p-4 text-left font-semibold">ID</th>
                 <th className="p-4 text-left font-semibold">Coupon Code</th>
-                <th className="p-4 text-left font-semibold">IP Address</th>
+                {/* <th className="p-4 text-left font-semibold">IP Address</th> */}
                 <th className="p-4 text-left font-semibold">Session ID</th>
                 <th className="p-4 text-left font-semibold">Timestamp</th>
               </tr>
@@ -123,7 +123,7 @@ const ClaimHistory: React.FC = () => {
                   >
                     <td className="p-4 text-gray-800">{claim.id}</td>
                     <td className="p-4 text-gray-800">{claim.coupon.code}</td>
-                    <td className="p-4 text-gray-800">{claim.ipAddress}</td>
+                    {/* <td className="p-4 text-gray-800">{claim.ipAddress}</td> */}
                     <td className="p-4 text-gray-800">{claim.cookieId}</td>
                     <td className="p-4 text-gray-800">
                       {new Date(claim.timestamp).toLocaleString()}
